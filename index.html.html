@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="sr" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>ROVEN — Taste of California | Digital Menu</title>
+
+  <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            roven: {
+              dark: '#0A0D10',
+              card: '#11161B',
+              surface: '#171F26',
+              teal: '#074C52',
+              tealLight: '#0E747D',
+              orange: '#F27935',
+              gold: '#FBBF24',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    html {
+      scroll-behavior: smooth;
+      background-color: #0A0D10;
+      color: #F3F4F6;
+    }
+    /* Seamless blending for PNG logos with black backgrounds */
+    .logo-blend {
+      mix-blend-mode: lighten;
+    }
+  </style>
+</head>
+<body class="bg-roven-dark text-gray-100 font-sans antialiased selection:bg-roven-orange selection:text-white pb-28">
+
+  <!-- Sticky Top Navigation Bar -->
+  <header class="sticky top-0 z-40 bg-roven-dark/95 backdrop-blur-md border-b border-white/10">
+    <div class="max-w-2xl mx-auto px-4 py-2.5 flex items-center justify-between gap-2">
+      <!-- Left: Standalone V-Flame PNG Icon (logo-v.png) + Inline SVG Fallback -->
+      <a href="#top" class="flex items-center gap-2.5 group">
+        <div class="w-11 h-11 rounded-xl bg-black border border-white/15 flex items-center justify-center p-1 shadow-md group-hover:border-roven-orange/60 transition overflow-hidden">
+          <img
+            src="logo-v.png"
+            alt="ROVEN"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+            class="h-10 w-auto object-contain rounded-lg logo-blend"
+          />
+          <svg style="display:none" viewBox="0 0 64 64" class="h-9 w-9" aria-hidden="true">
+            <path d="M31 28 C25 20, 27 12, 34 6 C32 13, 36 16, 39 22 C41 26, 37 31, 31 28 Z" fill="#F27935"/>
+            <path d="M12 24 L23 24 L32 45 L41 24 L52 24 L36 58 L28 58 Z" fill="#074C52" stroke="#FFFFFF" stroke-width="2.5"/>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="font-display font-extrabold text-base tracking-wider text-white leading-none">ROVEN</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-roven-teal/80 text-roven-gold border border-roven-gold/30">Novi Sad</span>
+          </div>
+          <p class="text-[11px] font-bold text-roven-orange tracking-wide mt-0.5">Taste of California</p>
+        </div>
+      </a>
+
+      <!-- Right: Bilingual SR / EN Switcher -->
+      <div class="flex items-center bg-roven-card p-1 rounded-xl border border-white/10" role="group" aria-label="Language Switcher">
+        <button id="lang-sr" onclick="setLanguage('sr')" class="px-3 py-1.5 rounded-lg text-xs font-extrabold transition bg-roven-orange text-white shadow">SR</button>
+        <button id="lang-en" onclick="setLanguage('en')" class="px-3 py-1.5 rounded-lg text-xs font-extrabold transition text-gray-400 hover:text-white">EN</button>
+      </div>
+    </div>
+
+    <!-- Search & Dietary Filter Row -->
+    <div class="max-w-2xl mx-auto px-4 pb-2.5 flex items-center gap-2">
+      <div class="relative flex-1">
+        <svg class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input id="search-input" type="text" oninput="handleSearch(this.value)" placeholder="Pretraži meni (piletina, tofu, losos...)" class="w-full bg-roven-card text-sm text-white placeholder-gray-500 pl-9 pr-8 py-2 rounded-xl border border-white/10 focus:outline-none focus:border-roven-orange transition" />
+        <button id="clear-search" onclick="clearSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white p-1" aria-label="Clear search">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Dietary Quick Filters -->
+      <button id="filter-vegan" onclick="toggleDietaryFilter('vegan')" class="px-3 py-2 rounded-xl bg-roven-card border border-white/10 text-xs font-semibold text-gray-300 hover:border-emerald-500/50 transition flex items-center gap-1 shrink-0 active:scale-95">
+        <span>🌱</span>
+        <span id="label-vegan">Vegan</span>
+      </button>
+      <button id="filter-spicy" onclick="toggleDietaryFilter('spicy')" class="px-3 py-2 rounded-xl bg-roven-card border border-white/10 text-xs font-semibold text-gray-300 hover:border-roven-orange/50 transition flex items-center gap-1 shrink-0 active:scale-95">
+        <span>🔥</span>
+        <span id="label-spicy">Ljuto</span>
+      </button>
+    </div>
+
+    <!-- Horizontal Scrollable Category Tabs -->
+    <nav id="category-tabs" class="max-w-2xl mx-auto px-4 pb-3 flex items-center gap-2 overflow-x-auto no-scrollbar">
+      <!-- Populated dynamically via JS -->
+    </nav>
+  </header>
+
+  <!-- Main Content Container -->
+  <main id="top" class="max-w-2xl mx-auto px-4 pt-4 space-y-6">
+
+    <!-- HERO BANNER WITH EXACT UPLOADED FULL LOGO (logo-full.png) + INLINE SVG FALLBACK -->
+    <section class="relative overflow-hidden rounded-3xl bg-black border-2 border-roven-gold/40 shadow-2xl">
+      <div class="absolute -top-16 left-1/2 -translate-x-1/2 w-80 h-40 bg-roven-orange/15 blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-16 left-1/4 w-72 h-40 bg-roven-teal/30 blur-3xl pointer-events-none"></div>
+
+      <div class="relative z-10 px-4 pt-5 pb-5 sm:px-6 sm:pt-6 flex flex-col items-center text-center">
+        <!-- Top Experience Pill -->
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-roven-teal/40 border border-roven-gold/30 text-[11px] font-bold uppercase tracking-wider text-roven-gold mb-3">
+          <span>★</span>
+          <span id="hero-badge">18 GODINA KULINARSKOG ISKUSTVA U NOVOM SADU</span>
+        </div>
+
+        <!-- Exact Full ROVEN Logo Image (logo-full.png) -->
+        <div class="w-full my-1">
+          <img
+            id="hero-logo-img"
+            src="logo-full.png"
+            alt="ROVEN - Taste of California"
+            onerror="this.style.display='none'; document.getElementById('hero-logo-fallback').style.display='block';"
+            class="w-full max-w-md mx-auto object-contain rounded-xl logo-blend"
+          />
+
+          <!-- Clean Inline SVG Fallback if logo-full.png is unavailable -->
+          <div id="hero-logo-fallback" style="display:none" class="py-2">
+            <svg viewBox="0 0 420 130" class="w-full max-w-sm mx-auto h-auto" aria-label="ROVEN - Taste of California">
+              <defs>
+                <linearGradient id="caliGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#FBBF24"/>
+                  <stop offset="100%" stop-color="#F27935"/>
+                </linearGradient>
+              </defs>
+              <path d="M210 34 C202 24, 205 14, 214 6 C211 15, 217 19, 220 27 C222 32, 217 37, 210 34 Z" fill="#F27935"/>
+              <text x="210" y="84" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-weight="800" font-size="56" letter-spacing="10" fill="#074C52" stroke="#FFFFFF" stroke-width="2">ROVEN</text>
+              <text x="210" y="114" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-weight="700" font-size="20" letter-spacing="5" fill="url(#caliGrad)">Taste of California</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Short Tagline -->
+        <p id="hero-desc" class="text-xs sm:text-sm text-gray-300 max-w-lg leading-relaxed mt-2">
+          Fuzija azijskih, latinoameričkih i italijanskih ukusa. Sveži sastojci, unikatni domaći sosevi i vrhunsko marinirano meso.
+        </p>
+
+        <!-- Single Hero Action Button: Our Story -->
+        <div class="mt-4 flex items-center justify-center">
+          <button onclick="openAboutModal()" id="hero-story-btn" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-roven-gold/35 text-xs font-bold text-roven-gold transition active:scale-95">
+            Naša priča (18 god.)
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Active Filter Indicator -->
+    <div id="active-filter-banner" class="hidden items-center justify-between bg-roven-surface border border-roven-orange/40 rounded-xl px-3.5 py-2 text-xs">
+      <span id="active-filter-text" class="text-gray-200 font-medium"></span>
+      <button onclick="resetAllFilters()" id="reset-filters-btn" class="text-roven-gold font-bold hover:underline">Poništi filtere</button>
+    </div>
+
+    <!-- Dynamic Menu Sections Container -->
+    <div id="menu-container" class="space-y-8">
+      <!-- Rendered via JavaScript -->
+    </div>
+
+    <!-- Empty Search State -->
+    <div id="empty-state" class="hidden text-center py-12 px-4 rounded-2xl bg-roven-card border border-white/10">
+      <div class="text-3xl mb-2">🔍</div>
+      <h3 id="empty-title" class="font-bold text-white text-base">Nema rezultata pretrage</h3>
+      <p id="empty-desc" class="text-xs text-gray-400 mt-1 mb-4">Pokušajte sa drugim pojmom ili uklonite aktivne filtere.</p>
+      <button onclick="resetAllFilters()" id="empty-reset-btn" class="px-4 py-2 rounded-xl bg-roven-orange text-white font-bold text-xs">Prikaži ceo meni</button>
+    </div>
+
+    <!-- Allergen Notice & Brand Footer -->
+    <footer class="pt-4 border-t border-white/10 space-y-4">
+      <div class="rounded-2xl bg-roven-card/90 border border-white/10 p-4">
+        <div class="flex items-center gap-2 text-roven-gold font-bold text-xs uppercase tracking-wider mb-2">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          <span id="allergen-heading">Informacije o alergenima</span>
+        </div>
+        <p id="allergen-text" class="text-[11px] text-gray-400 leading-relaxed">
+          Spisak potencijalnih alergena u našim proizvodima: žitarice koje sadrže gluten (pšenica, raž, ječam, ovas), mleko i mlečni proizvodi (uključujući laktozu), jaja, soja, kikiriki, jezgrasto voće, seme susama, slačica (senf), celer. Za detaljne informacije o alergenima za svako pojedinačno jelo, obratite se osoblju pre porudžbine. Napomena o alergenima: Veganska jela se pripremaju u kuhinji u kojoj se koriste mlečni proizvodi i namirnice životinjskog porekla, te mogu sadržati njihove tragove.
+        </p>
+      </div>
+
+      <!-- Clean Brand Footer with V Logo -->
+      <div class="rounded-2xl bg-roven-card border border-white/10 p-4 text-center space-y-2">
+        <div class="w-11 h-11 mx-auto rounded-xl bg-black border border-white/15 flex items-center justify-center p-1 overflow-hidden">
+          <img
+            src="logo-v.png"
+            alt="ROVEN"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+            class="h-10 w-auto mx-auto object-contain rounded-lg logo-blend"
+          />
+          <svg style="display:none" viewBox="0 0 64 64" class="h-9 w-9 mx-auto" aria-hidden="true">
+            <path d="M31 28 C25 20, 27 12, 34 6 C32 13, 36 16, 39 22 C41 26, 37 31, 31 28 Z" fill="#F27935"/>
+            <path d="M12 24 L23 24 L32 45 L41 24 L52 24 L36 58 L28 58 Z" fill="#074C52" stroke="#FFFFFF" stroke-width="2.5"/>
+          </svg>
+        </div>
+        <p class="text-xs font-extrabold text-white tracking-wider">ROVEN — Taste of California</p>
+        <p id="footer-currency-note" class="text-[11px] text-gray-400">Novi Sad • Sve cene su izražene u dinarima (RSD).</p>
+      </div>
+    </footer>
+  </main>
+
+  <!-- FLOATING CUSTOMER ORDER LIST BAR (Appears when customer taps "+ Dodaj" / "+ Add") -->
+  <div id="floating-order-bar" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-xl hidden">
+    <button onclick="openOrderModal()" class="w-full rounded-2xl bg-gradient-to-r from-roven-orange via-amber-500 to-roven-gold text-roven-dark p-3.5 shadow-2xl shadow-roven-orange/30 flex items-center justify-between font-extrabold text-sm transition active:scale-[0.99]">
+      <div class="flex items-center gap-2.5">
+        <span id="order-count-badge" class="w-7 h-7 rounded-xl bg-roven-dark text-roven-gold flex items-center justify-center text-xs font-extrabold">0</span>
+        <span id="order-bar-label">Moja porudžbina (Prikaži osoblju)</span>
+      </div>
+      <span id="order-total-badge" class="font-display text-base">0 RSD</span>
+    </button>
+  </div>
+
+  <!-- MODAL 1: CUSTOMER TABLE ORDER LIST (For showing staff at the counter or table) -->
+  <div id="order-modal" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-sm">
+    <div class="bg-roven-card border-t sm:border border-roven-gold/30 rounded-t-3xl sm:rounded-3xl max-w-md w-full p-6 shadow-2xl max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-xl bg-black border border-white/15 flex items-center justify-center p-1 overflow-hidden">
+            <img
+              src="logo-v.png"
+              alt="ROVEN"
+              onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+              class="h-9 w-auto object-contain rounded-lg logo-blend"
+            />
+            <svg style="display:none" viewBox="0 0 64 64" class="h-8 w-8" aria-hidden="true">
+              <path d="M31 28 C25 20, 27 12, 34 6 C32 13, 36 16, 39 22 C41 26, 37 31, 31 28 Z" fill="#F27935"/>
+              <path d="M12 24 L23 24 L32 45 L41 24 L52 24 L36 58 L28 58 Z" fill="#074C52" stroke="#FFFFFF" stroke-width="2.5"/>
+            </svg>
+          </div>
+          <div>
+            <h3 id="order-modal-title" class="font-display font-extrabold text-lg text-white">Moja porudžbina</h3>
+            <p id="order-modal-sub" class="text-[11px] text-gray-400">Pokažite ekran osoblju na pultu ili za stolom</p>
+          </div>
+        </div>
+        <button onclick="closeOrderModal()" aria-label="Close" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-gray-300">✕</button>
+      </div>
+
+      <div id="order-items-list" class="py-4 space-y-2.5 overflow-y-auto flex-1">
+        <!-- Populated dynamically -->
+      </div>
+
+      <div class="pt-3 border-t border-white/10 space-y-3">
+        <div class="flex items-center justify-between text-base font-extrabold">
+          <span id="order-modal-total-label" class="text-gray-300">Ukupno:</span>
+          <span id="order-modal-total-val" class="font-display text-xl text-roven-gold">0 RSD</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <button onclick="clearOrder()" id="order-clear-btn" class="py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-gray-300 font-bold text-xs transition">
+            Isprazni listu
+          </button>
+          <button onclick="closeOrderModal()" id="order-done-btn" class="py-2.5 rounded-xl bg-roven-orange text-white font-bold text-xs transition">
+            Nastavi pregled
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: ABOUT ROVEN STORY -->
+  <div id="about-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/85 backdrop-blur-sm">
+    <div class="bg-roven-card border border-roven-gold/35 rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
+      <button onclick="closeAboutModal()" aria-label="Close" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-gray-300">✕</button>
+      <div class="flex flex-col items-center text-center mb-4">
+        <div class="w-56 mb-2 bg-black rounded-2xl p-2 border border-white/10">
+          <img
+            src="logo-full.png"
+            alt="ROVEN - Taste of California"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+            class="w-full h-auto object-contain rounded-xl logo-blend"
+          />
+          <div style="display:none" class="py-2">
+            <span class="font-display font-extrabold text-3xl tracking-widest text-roven-teal">ROVEN</span>
+            <p class="text-xs font-bold text-roven-gold">Taste of California</p>
+          </div>
+        </div>
+        <span class="text-[11px] font-bold uppercase tracking-widest text-roven-gold">Novi Sad • Serbia</span>
+      </div>
+      <p id="modal-about-body" class="text-sm text-gray-200 leading-relaxed">
+        18 godina kulinarskog iskustva, sada u Novom Sadu oblikovan kroz skoro dve decenije rada u kuhinjama od Kalifornije i Mediterana do Azije, ROVEN donosi fuziju azijskih, latinoameričkih i italijanskih ukusa pravo na vaš tanjir. Sveži sastojci, unikatni domaći sosevi i vrhunsko marinirano meso pripremljeno čisto da pruži radost, poveže ljude i podeli smele ukuse. Hvala vam što ste svratili.
+      </p>
+      <button onclick="closeAboutModal()" id="modal-about-close" class="mt-6 w-full py-3 rounded-xl bg-gradient-to-r from-roven-orange to-amber-500 text-roven-dark font-extrabold text-sm hover:brightness-110 transition">
+        Nazad na meni
+      </button>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 hidden bg-roven-gold text-roven-dark font-extrabold text-xs px-4 py-2 rounded-full shadow-2xl"></div>
+
+  <script>
+    // =========================================================================
+    // ROVEN COMPLETE BILINGUAL MENU DATA (SR / EN)
+    // =========================================================================
+    const MENU_DATA = {
+      ui: {
+        sr: {
+          searchPlaceholder: "Pretraži meni (piletina, tofu, losos...)",
+          vegan: "Vegan",
+          spicy: "Ljuto",
+          heroBadge: "18 GODINA KULINARSKOG ISKUSTVA U NOVOM SADU",
+          heroDesc: "Fuzija azijskih, latinoameričkih i italijanskih ukusa. Sveži sastojci, unikatni domaći sosevi i vrhunsko marinirano meso.",
+          heroStoryBtn: "Naša priča (18 god.)",
+          aboutFull: "18 godina kulinarskog iskustva, sada u Novom Sadu oblikovan kroz skoro dve decenije rada u kuhinjama od Kalifornije i Mediterana do Azije, ROVEN donosi fuziju azijskih, latinoameričkih i italijanskih ukusa pravo na vaš tanjir. Sveži sastojci, unikatni domaći sosevi i vrhunsko marinirano meso pripremljeno čisto da pruži radost, poveže ljude i podeli smele ukuse. Hvala vam što ste svratili.",
+          modalClose: "Nazad na meni",
+          resetFilters: "Poništi filtere",
+          emptyTitle: "Nema rezultata pretrage",
+          emptyDesc: "Pokušajte sa drugim pojmom ili uklonite aktivne filtere.",
+          emptyReset: "Prikaži ceo meni",
+          allergenHeading: "Informacije o alergenima",
+          allergenText: "Spisak potencijalnih alergena u našim proizvodima: žitarice koje sadrže gluten (pšenica, raž, ječam, ovas), mleko i mlečni proizvodi (uključujući laktozu), jaja, soja, kikiriki, jezgrasto voće, seme susama, slačica (senf), celer. Za detaljne informacije o alergenima za svako pojedinačno jelo, obratite se osoblju pre porudžbine. Napomena o alergenima: Veganska jela se pripremaju u kuhinji u kojoj se koriste mlečni proizvodi i namirnice životinjskog porekla, te mogu sadržati njihove tragove.",
+          currencyNote: "Novi Sad • Sve cene su izražene u dinarima (RSD).",
+          filterLabel: "Aktivni filteri:",
+          addBtn: "+ Dodaj",
+          addedToast: "Dodato u porudžbinu",
+          orderBarLabel: "Moja porudžbina (Prikaži osoblju)",
+          orderModalTitle: "Moja porudžbina",
+          orderModalSub: "Pokažite ekran osoblju na pultu ili za stolom",
+          orderModalTotal: "Ukupno:",
+          orderClearBtn: "Isprazni listu",
+          orderDoneBtn: "Nastavi pregled"
+        },
+        en: {
+          searchPlaceholder: "Search menu (chicken, tofu, salmon...)",
+          vegan: "Vegan",
+          spicy: "Spicy",
+          heroBadge: "18 YEARS OF CULINARY EXPERIENCE IN NOVI SAD",
+          heroDesc: "A fusion of Asian, Latin American, and Italian flavors. Fresh ingredients, unique house-made sauces, and premium marinated meats.",
+          heroStoryBtn: "Our Story (18 yrs)",
+          aboutFull: "18 years of culinary experience, now in Novi Sad—shaped through nearly two decades in kitchens from California and the Mediterranean to Asia, ROVEN brings a fusion of Asian, Latin American, and Italian flavors straight to your plate. Fresh ingredients, unique house-made sauces, and premium marinated meats crafted to bring joy, connect people, and share bold flavors. Thank you for stopping by.",
+          modalClose: "Back to Menu",
+          resetFilters: "Reset filters",
+          emptyTitle: "No matching items found",
+          emptyDesc: "Try searching for another ingredient or clear your active filters.",
+          emptyReset: "Show Full Menu",
+          allergenHeading: "Allergen Information",
+          allergenText: "List of potential allergens in our products: cereals containing gluten (wheat, rye, barley, oats), milk and dairy products (including lactose), eggs, soy, peanuts, tree nuts, sesame seeds, mustard, celery. For detailed allergen information for each individual dish, please consult our staff before ordering. Allergen note: Vegan dishes are prepared in a kitchen that uses dairy and animal-derived ingredients and may contain traces of them.",
+          currencyNote: "Novi Sad • All prices are listed in Serbian Dinars (RSD).",
+          filterLabel: "Active filters:",
+          addBtn: "+ Add",
+          addedToast: "Added to my order",
+          orderBarLabel: "My Order (Show Staff)",
+          orderModalTitle: "My Order",
+          orderModalSub: "Show this screen to our staff at the counter or table",
+          orderModalTotal: "Total:",
+          orderClearBtn: "Clear List",
+          orderDoneBtn: "Continue Browsing"
+        }
+      },
+
+      categories: [
+        { id: "all", sr: "Sve", en: "All" },
+        { id: "sandwiches", sr: "Sendviči", en: "Sandwiches" },
+        { id: "bowls", sr: "Loaded Bowls", en: "Loaded Bowls" },
+        { id: "plate", sr: "Glazed Plate", en: "Glazed Plate" },
+        { id: "signature", sr: "Signature Cali", en: "Signature Cali" },
+        { id: "flavors", sr: "14 Soseva", en: "14 Sauces" },
+        { id: "extras", sr: "Dodatno", en: "Extras" }
+      ],
+
+      sandwiches: {
+        title: { sr: "CALI GLAZED SANDWICH", en: "CALI GLAZED SANDWICH" },
+        subtitle: {
+          sr: "Izaberite: Marinirani pileći file 100g / Sporo pečena marinirana ćuretina",
+          en: "Choose protein: Marinated chicken fillet 100g / Slow-roasted marinated turkey"
+        },
+        items: [
+          {
+            id: "sw-base",
+            name: { sr: "Cali Glazed Sandwich", en: "Cali Glazed Sandwich" },
+            desc: {
+              sr: "Marinirani pileći file 100g ili sporo pečena marinirana ćuretina u svežoj zemički sa sosom po izboru.",
+              en: "Marinated chicken fillet (100g) or slow-roasted marinated turkey in a fresh bun with your choice of sauce."
+            },
+            priceNum: 380,
+            tags: []
+          },
+          {
+            id: "sw-combo",
+            name: { sr: "Combo (Sandwich + Čips)", en: "Combo (Sandwich + Chips)" },
+            desc: {
+              sr: "Srednja porcija piletina / ćuretina + Kedžun tortilja čips.",
+              en: "Medium portion chicken / turkey sandwich + Cajun tortilla chips."
+            },
+            priceNum: 480,
+            badge: { sr: "Popularno", en: "Popular" },
+            tags: []
+          },
+          {
+            id: "sw-combo-drink",
+            name: { sr: "Combo + Drink", en: "Combo + Drink" },
+            desc: {
+              sr: "Sendvič + Kedžun tortilja čips + piće po izboru.",
+              en: "Sandwich + Cajun tortilla chips + drink of choice."
+            },
+            priceNum: 579,
+            badge: { sr: "Best Value", en: "Best Value" },
+            tags: []
+          },
+          {
+            id: "sw-duo",
+            name: { sr: "Deal Duo (2 Medium)", en: "Deal Duo (2 Medium)" },
+            desc: {
+              sr: "Dva srednja Cali Glazed sendviča po izboru.",
+              en: "Two medium Cali Glazed sandwiches of your choice."
+            },
+            priceNum: 890,
+            tags: []
+          }
+        ],
+        addons: [
+          { id: "addon-slaw", name: { sr: "Extra Kolslo", en: "Extra Coleslaw" }, priceNum: 50 },
+          { id: "addon-meat80", name: { sr: "Ekstra meso 80g", en: "Extra meat 80g" }, priceNum: 170 }
+        ]
+      },
+
+      bowls: {
+        title: { sr: "CALI LOADED BOWLS", en: "CALI LOADED BOWLS" },
+        subtitle: {
+          sr: "Sastavite svoju činiju u 3 koraka",
+          en: "Build your signature bowl in 3 steps"
+        },
+        sizes: [
+          { id: "bowl-sm", name: { sr: "Cali Loaded Bowl — Small", en: "Cali Loaded Bowl — Small" }, label: { sr: "Small Bowl", en: "Small Bowl" }, priceNum: 400 },
+          { id: "bowl-md", name: { sr: "Cali Loaded Bowl — Medium", en: "Cali Loaded Bowl — Medium" }, label: { sr: "Medium Bowl", en: "Medium Bowl" }, priceNum: 560 },
+          { id: "bowl-duo", name: { sr: "Cali Loaded Bowl — Deal Duo (2 Medium)", en: "Cali Loaded Bowl — Deal Duo (2 Medium)" }, label: { sr: "Deal Duo (2 Medium)", en: "Deal Duo (2 Medium)" }, priceNum: 890 },
+          { id: "bowl-ex", name: { sr: "Ekstra Loaded Meso (+150g)", en: "Extra Loaded Meat (+150g)" }, label: { sr: "Ekstra Loaded Meso (+150g)", en: "Extra Loaded Meat (+150g)" }, priceNum: 200, accent: true }
+        ],
+        steps: [
+          {
+            step: "STEP 1",
+            title: { sr: "Izaberi bazu za Loaded Bowl", en: "Choose your Loaded Bowl base" },
+            options: {
+              sr: ["Italijanska pasta (Pomodorino / Blagi kari)", "Pečeni seljački krompir", "Čedar kedžun tortilja čips"],
+              en: ["Italian pasta (Pomodorino / Mild curry)", "Roasted country-style potatoes", "Cheddar Cajun tortilla chips"]
+            }
+          },
+          {
+            step: "STEP 2",
+            title: { sr: "Izbor mesa", en: "Choose your protein" },
+            options: {
+              sr: ["Marinirani pileći file", "Sporo pečena cepkana ćuretina"],
+              en: ["Marinated chicken fillet", "Slow-roasted pulled turkey"]
+            }
+          },
+          {
+            step: "STEP 3",
+            title: { sr: "Izaberi ukus za marinirano meso i uživaj!", en: "Pick your glaze for marinated meat & enjoy!" },
+            options: {
+              sr: ["Izaberite bilo koji od naših 14 domaćih soseva."],
+              en: ["Select any of our 14 signature house sauces."]
+            }
+          }
+        ]
+      },
+
+      plate: {
+        id: "cali-plate",
+        title: { sr: "CALI GLAZED PLATE", en: "CALI GLAZED PLATE" },
+        priceNum: 790,
+        subtitle: {
+          sr: "Kompletan obrok na tanjiru u 4 koraka",
+          en: "Complete gourmet platter built in 4 steps"
+        },
+        steps: [
+          {
+            step: "STEP 1",
+            desc: { sr: "Izaberite sos za mariniranu piletinu (180g)", en: "Choose your sauce for marinated chicken (180g)" }
+          },
+          {
+            step: "STEP 2",
+            desc: { sr: "Izaberite sos za italijansku testeninu: Pomodorino / Blagi kari", en: "Choose your sauce for Italian pasta: Pomodorino / Mild curry" }
+          },
+          {
+            step: "STEP 3",
+            desc: {
+              sr: "Uživajte u našoj kupus salati na japanski način (pečeni krompir, kisela šargarepa, kiseli luk, kisela pavlaka, majonez, soja sos, začini)",
+              en: "Enjoy our Japanese-style fusion coleslaw salad (roasted potatoes, pickled carrot, pickled onion, sour cream, mayonnaise, soy sauce, spices)"
+            }
+          },
+          {
+            step: "STEP 4",
+            desc: { sr: "Izaberite sos za kedžun tortilja čips", en: "Choose a sauce for your Cajun tortilla chips" }
+          }
+        ]
+      },
+
+      signature: {
+        title: { sr: "SIGNATURE CALI", en: "SIGNATURE CALI" },
+        priceLabel: "MEDIUM — 700 RSD",
+        subtitle: {
+          sr: "Autorske kombinacije šefa kuhinje (svaka porcija Medium — 700 RSD)",
+          en: "Chef's signature creations (Medium — 700 RSD each)"
+        },
+        items: [
+          {
+            id: "sig-1",
+            num: 1,
+            format: { sr: "Bowl", en: "Bowl" },
+            protein: { sr: "Cold • Fish", en: "Cold • Fish" },
+            desc: {
+              sr: "Začinjena leblebija, komadići tunjevine, kalifornijska mešavina začinskog bilja, kapar, krutoni i blagi preliv od tabaska",
+              en: "Spiced chickpeas, tuna chunks, California herb blend, capers, croutons, and mild Tabasco dressing"
+            },
+            priceNum: 700,
+            tags: ["cold", "fish"]
+          },
+          {
+            id: "sig-2",
+            num: 2,
+            format: { sr: "Bowl", en: "Bowl" },
+            protein: { sr: "Cold • Fish", en: "Cold • Fish" },
+            desc: {
+              sr: "Hladni pečeni krompir, tortilja čips, sečeni avokado, ukiseljena šargarepa i ukiseljeni luk, losos, fjužn francuski sos",
+              en: "Chilled roasted potatoes, tortilla chips, sliced avocado, pickled carrot and pickled onion, salmon, fusion French dressing"
+            },
+            priceNum: 700,
+            tags: ["cold", "fish"]
+          },
+          {
+            id: "sig-3",
+            num: 3,
+            format: { sr: "Bowl", en: "Bowl" },
+            protein: { sr: "Turkey • Spicy", en: "Turkey • Spicy" },
+            desc: {
+              sr: "Pečeni krompir, cepkana marinirana sporo pečena ćuretina, kimči, ukiseljena šargarepa i luk, sos po izboru",
+              en: "Roasted potatoes, pulled marinated slow-roasted turkey, kimchi, pickled carrot and onion, sauce of choice"
+            },
+            priceNum: 700,
+            tags: ["spicy", "turkey"]
+          },
+          {
+            id: "sig-4",
+            num: 4,
+            format: { sr: "Bowl", en: "Bowl" },
+            protein: { sr: "Vegan", en: "Vegan" },
+            desc: {
+              sr: "Začinjena leblebija, krutoni, grilovani tofu sir na kockice, avokado, ukiseljeni crveni luk i hrskavi pečeni kikiriki, blagi preliv od tartar sosa",
+              en: "Spiced chickpeas, croutons, diced grilled tofu, avocado, pickled red onion, and crunchy roasted peanuts, mild tartar dressing"
+            },
+            priceNum: 700,
+            tags: ["vegan"]
+          },
+          {
+            id: "sig-5",
+            num: 5,
+            format: { sr: "Bowl", en: "Bowl" },
+            protein: { sr: "Vegan • Spicy", en: "Vegan • Spicy" },
+            desc: {
+              sr: "Hladna nauljena testenina, grilovani tofu sir na kockice, kimči, kukuruz šećerac, ukiseljeni crveni luk i hrskavi pečeni kikiriki, sos po izboru",
+              en: "Chilled herb-oiled pasta, diced grilled tofu, kimchi, sweet corn, pickled red onion, and crunchy roasted peanuts, sauce of choice"
+            },
+            priceNum: 700,
+            tags: ["vegan", "spicy"]
+          },
+          {
+            id: "sig-6",
+            num: 6,
+            format: { sr: "Bowl", en: "Bowl" },
+            protein: { sr: "Vegetarian • Cold/Warm", en: "Vegetarian • Cold/Warm" },
+            desc: {
+              sr: "Topli kukuruz preliven otopljenim čedar sirom, kapar, krutoni, tofu, srirača",
+              en: "Warm sweet corn topped with melted cheddar cheese, capers, croutons, tofu, sriracha"
+            },
+            priceNum: 700,
+            tags: ["vegetarian", "spicy"]
+          },
+          {
+            id: "sig-7",
+            num: 7,
+            format: { sr: "Bowl", en: "Bowl" },
+            protein: { sr: "Vegan • Cold", en: "Vegan • Cold" },
+            desc: {
+              sr: "Humus, avokado, kapar, hladni pečeni krompir, ukiseljeni crveni luk, ukiseljena šargarepa, tofu",
+              en: "Hummus, avocado, capers, chilled roasted potatoes, pickled red onion, pickled carrot, tofu"
+            },
+            priceNum: 700,
+            tags: ["vegan", "cold"]
+          },
+          {
+            id: "sig-8",
+            num: 8,
+            format: { sr: "Sandwich", en: "Sandwich" },
+            protein: { sr: "Fish • Spicy", en: "Fish • Spicy" },
+            desc: {
+              sr: "Humus, avokado, kapar, japanska fjužn kolslo salata, dimljeni losos, blagi preliv od tartar sosa",
+              en: "Hummus, avocado, capers, Japanese fusion coleslaw salad, smoked salmon, mild tartar dressing"
+            },
+            priceNum: 700,
+            tags: ["spicy", "fish"]
+          },
+          {
+            id: "sig-9",
+            num: 9,
+            format: { sr: "Sandwich", en: "Sandwich" },
+            protein: { sr: "Fish • Spicy", en: "Fish • Spicy" },
+            desc: {
+              sr: "Pikantni humus, komadići tunjevine, japanska fjužn kolslo salata, prelivena sriračom",
+              en: "Spicy hummus, tuna chunks, Japanese fusion coleslaw salad, drizzled with sriracha"
+            },
+            priceNum: 700,
+            tags: ["spicy", "fish"]
+          }
+        ]
+      },
+
+      flavors: {
+        title: { sr: "CALI GLAZED FLAVORS — 14 SOSEVA", en: "CALI GLAZED FLAVORS — 14 SAUCES" },
+        subtitle: {
+          sr: "Izaberite savršen preliv za vaše meso, činiju ili tortilja čips",
+          en: "Pick the perfect glaze or dip for your meat, bowl, or tortilla chips"
+        },
+        list: [
+          { name: "Sweet Sriracha", spicy: true, color: "#991B1B" },
+          { name: "Black Truffle Cream", spicy: false, color: "#E5E7EB" },
+          { name: "French Cheddar", spicy: false, color: "#F59E0B" },
+          { name: "Teriyaki", spicy: false, color: "#1C1917" },
+          { name: "Garlic Parmesan", spicy: false, color: "#FDE68A" },
+          { name: "Peri Peri", spicy: true, color: "#DC2626" },
+          { name: "Louisiana Sauce", spicy: true, color: "#7F1D1D" },
+          { name: "Honey Mustard", spicy: false, color: "#FCD34D" },
+          { name: "Alabama White BBQ", spicy: true, color: "#F3F4F6" },
+          { name: "Thai Sauce", spicy: true, color: "#9A3412" },
+          { name: "Gorgonzola Cream", spicy: false, color: "#FEF3C7" },
+          { name: "BBQ", spicy: false, color: "#451A03" },
+          { name: "Pomodoro Parmesan", spicy: false, color: "#EA580C" },
+          { name: "Hot BBQ", spicy: true, color: "#7C2D12" }
+        ]
+      },
+
+      extras: {
+        title: { sr: "DODATNO", en: "EXTRAS" },
+        subtitle: {
+          sr: "Piće i dodaci za vaš obrok",
+          en: "Drinks and extras for your meal"
+        },
+        items: [
+          {
+            id: "ext-drink",
+            name: { sr: "Drink", en: "Drink" },
+            desc: { sr: "Osvežavajuće piće po izboru", en: "Refreshing beverage of your choice" },
+            priceNum: 120
+          },
+          {
+            id: "ext-chips",
+            name: { sr: "Kedžun tortilja čips", en: "Cajun Tortilla Chips" },
+            desc: { sr: "Hrskavi tortilja čips sa kedžun začinima", en: "Crispy tortilla chips seasoned with Cajun spices" },
+            priceNum: 120
+          },
+          {
+            id: "ext-slaw",
+            name: { sr: "Extra Kolslo", en: "Extra Coleslaw" },
+            desc: { sr: "Dodatna porcija japanske fjužn kolslo salate", en: "Extra portion of Japanese fusion coleslaw" },
+            priceNum: 50
+          },
+          {
+            id: "ext-meat80",
+            name: { sr: "Ekstra meso 80g", en: "Extra Meat 80g" },
+            desc: { sr: "Dodatak za sendvič (piletina ili ćuretina)", en: "Sandwich add-on (chicken or turkey)" },
+            priceNum: 170
+          },
+          {
+            id: "ext-meat150",
+            name: { sr: "Ekstra Loaded Meso +150g", en: "Extra Loaded Meat +150g" },
+            desc: { sr: "Dodatak za Loaded Bowl činiju", en: "Loaded Bowl protein add-on" },
+            priceNum: 200
+          }
+        ]
+      }
+    };
+
+    // =========================================================================
+    // STATE
+    // =========================================================================
+    let currentLang = 'sr';
+    let activeCategory = 'all';
+    let searchQuery = '';
+    let dietaryFilters = { vegan: false, spicy: false };
+    let tableOrder = []; // { id, nameSr, nameEn, priceNum, qty }
+
+    // =========================================================================
+    // INIT
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      renderCategoryTabs();
+      updateStaticTranslations();
+      renderMenu();
+    });
+
+    // =========================================================================
+    // LANGUAGE SWITCHER
+    // =========================================================================
+    function setLanguage(lang) {
+      currentLang = lang;
+      const btnSr = document.getElementById('lang-sr');
+      const btnEn = document.getElementById('lang-en');
+
+      if (lang === 'sr') {
+        btnSr.className = 'px-3 py-1.5 rounded-lg text-xs font-extrabold transition bg-roven-orange text-white shadow';
+        btnEn.className = 'px-3 py-1.5 rounded-lg text-xs font-extrabold transition text-gray-400 hover:text-white';
+        document.documentElement.lang = 'sr';
+      } else {
+        btnEn.className = 'px-3 py-1.5 rounded-lg text-xs font-extrabold transition bg-roven-orange text-white shadow';
+        btnSr.className = 'px-3 py-1.5 rounded-lg text-xs font-extrabold transition text-gray-400 hover:text-white';
+        document.documentElement.lang = 'en';
+      }
+
+      updateStaticTranslations();
+      renderCategoryTabs();
+      renderMenu();
+      updateOrderUI();
+    }
+
+    function updateStaticTranslations() {
+      const t = MENU_DATA.ui[currentLang];
+      document.getElementById('search-input').placeholder = t.searchPlaceholder;
+      document.getElementById('label-vegan').textContent = t.vegan;
+      document.getElementById('label-spicy').textContent = t.spicy;
+      document.getElementById('hero-badge').textContent = t.heroBadge;
+      document.getElementById('hero-desc').textContent = t.heroDesc;
+      document.getElementById('hero-story-btn').textContent = t.heroStoryBtn;
+      document.getElementById('modal-about-body').textContent = t.aboutFull;
+      document.getElementById('modal-about-close').textContent = t.modalClose;
+      document.getElementById('reset-filters-btn').textContent = t.resetFilters;
+      document.getElementById('empty-title').textContent = t.emptyTitle;
+      document.getElementById('empty-desc').textContent = t.emptyDesc;
+      document.getElementById('empty-reset-btn').textContent = t.emptyReset;
+      document.getElementById('allergen-heading').textContent = t.allergenHeading;
+      document.getElementById('allergen-text').textContent = t.allergenText;
+      document.getElementById('footer-currency-note').textContent = t.currencyNote;
+      document.getElementById('order-bar-label').textContent = t.orderBarLabel;
+      document.getElementById('order-modal-title').textContent = t.orderModalTitle;
+      document.getElementById('order-modal-sub').textContent = t.orderModalSub;
+      document.getElementById('order-modal-total-label').textContent = t.orderModalTotal;
+      document.getElementById('order-clear-btn').textContent = t.orderClearBtn;
+      document.getElementById('order-done-btn').textContent = t.orderDoneBtn;
+    }
+
+    // =========================================================================
+    // CATEGORY TABS & FILTERS
+    // =========================================================================
+    function renderCategoryTabs() {
+      const container = document.getElementById('category-tabs');
+      container.innerHTML = MENU_DATA.categories.map(cat => {
+        const isActive = activeCategory === cat.id;
+        return `
+          <button
+            onclick="selectCategory('${cat.id}')"
+            class="px-3.5 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap transition active:scale-95 ${
+              isActive
+                ? 'bg-roven-orange text-white shadow-md shadow-roven-orange/25'
+                : 'bg-roven-card text-gray-300 border border-white/10 hover:border-roven-gold/40 hover:text-white'
+            }"
+          >
+            ${cat[currentLang]}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectCategory(catId) {
+      activeCategory = catId;
+      renderCategoryTabs();
+      renderMenu();
+    }
+
+    function handleSearch(val) {
+      searchQuery = val.trim().toLowerCase();
+      const clearBtn = document.getElementById('clear-search');
+      if (searchQuery.length > 0) {
+        clearBtn.classList.remove('hidden');
+      } else {
+        clearBtn.classList.add('hidden');
+      }
+      renderMenu();
+    }
+
+    function clearSearch() {
+      document.getElementById('search-input').value = '';
+      handleSearch('');
+    }
+
+    function toggleDietaryFilter(type) {
+      dietaryFilters[type] = !dietaryFilters[type];
+
+      const veganBtn = document.getElementById('filter-vegan');
+      const spicyBtn = document.getElementById('filter-spicy');
+
+      veganBtn.className = dietaryFilters.vegan
+        ? 'px-3 py-2 rounded-xl bg-emerald-500/20 border border-emerald-400 text-xs font-bold text-emerald-300 transition flex items-center gap-1 shrink-0 active:scale-95'
+        : 'px-3 py-2 rounded-xl bg-roven-card border border-white/10 text-xs font-semibold text-gray-300 hover:border-emerald-500/50 transition flex items-center gap-1 shrink-0 active:scale-95';
+
+      spicyBtn.className = dietaryFilters.spicy
+        ? 'px-3 py-2 rounded-xl bg-roven-orange/25 border border-roven-orange text-xs font-bold text-orange-300 transition flex items-center gap-1 shrink-0 active:scale-95'
+        : 'px-3 py-2 rounded-xl bg-roven-card border border-white/10 text-xs font-semibold text-gray-300 hover:border-roven-orange/50 transition flex items-center gap-1 shrink-0 active:scale-95';
+
+      renderMenu();
+    }
+
+    function resetAllFilters() {
+      activeCategory = 'all';
+      dietaryFilters.vegan = false;
+      dietaryFilters.spicy = false;
+      document.getElementById('search-input').value = '';
+      searchQuery = '';
+      document.getElementById('clear-search').classList.add('hidden');
+
+      document.getElementById('filter-vegan').className = 'px-3 py-2 rounded-xl bg-roven-card border border-white/10 text-xs font-semibold text-gray-300 hover:border-emerald-500/50 transition flex items-center gap-1 shrink-0 active:scale-95';
+      document.getElementById('filter-spicy').className = 'px-3 py-2 rounded-xl bg-roven-card border border-white/10 text-xs font-semibold text-gray-300 hover:border-roven-orange/50 transition flex items-center gap-1 shrink-0 active:scale-95';
+
+      renderCategoryTabs();
+      renderMenu();
+    }
+
+    function matchesFilters(textSr, textEn, tags = []) {
+      if (dietaryFilters.vegan && !tags.includes('vegan')) return false;
+      if (dietaryFilters.spicy && !tags.includes('spicy')) return false;
+      if (searchQuery) {
+        const haystack = `${textSr} ${textEn} ${tags.join(' ')}`.toLowerCase();
+        if (!haystack.includes(searchQuery)) return false;
+      }
+      return true;
+    }
+
+    // =========================================================================
+    // RENDER MENU
+    // =========================================================================
+    function renderMenu() {
+      const container = document.getElementById('menu-container');
+      const emptyState = document.getElementById('empty-state');
+      const activeBanner = document.getElementById('active-filter-banner');
+      const activeFilterText = document.getElementById('active-filter-text');
+      const t = MENU_DATA.ui[currentLang];
+
+      const activeLabels = [];
+      if (dietaryFilters.vegan) activeLabels.push('🌱 Vegan');
+      if (dietaryFilters.spicy) activeLabels.push(`🔥 ${t.spicy}`);
+      if (searchQuery) activeLabels.push(`"${searchQuery}"`);
+
+      if (activeLabels.length > 0) {
+        activeBanner.classList.remove('hidden');
+        activeBanner.classList.add('flex');
+        activeFilterText.textContent = `${t.filterLabel} ${activeLabels.join(' • ')}`;
+      } else {
+        activeBanner.classList.add('hidden');
+        activeBanner.classList.remove('flex');
+      }
+
+      let html = '';
+      let totalVisibleSections = 0;
+
+      // 1. CALI GLAZED SANDWICH
+      if (activeCategory === 'all' || activeCategory === 'sandwiches') {
+        const sw = MENU_DATA.sandwiches;
+        const filteredItems = sw.items.filter(item =>
+          matchesFilters(
+            `${sw.title.sr} ${item.name.sr} ${item.desc.sr} ${sw.subtitle.sr}`,
+            `${sw.title.en} ${item.name.en} ${item.desc.en} ${sw.subtitle.en}`,
+            item.tags
+          )
+        );
+
+        if (filteredItems.length > 0) {
+          totalVisibleSections++;
+          html += `
+            <section class="space-y-3">
+              <div class="border-l-4 border-roven-tealLight pl-3">
+                <h2 class="font-display font-extrabold text-lg sm:text-xl text-white tracking-tight">${sw.title[currentLang]}</h2>
+                <p class="text-xs text-gray-400 mt-0.5">${sw.subtitle[currentLang]}</p>
+              </div>
+
+              <div class="grid gap-3">
+                ${filteredItems.map(item => `
+                  <div class="rounded-2xl bg-roven-card border border-white/10 hover:border-roven-gold/35 p-4 transition shadow-md">
+                    <div class="flex items-start justify-between gap-3">
+                      <div class="space-y-1">
+                        <div class="flex items-center gap-2 flex-wrap">
+                          <h3 class="font-bold text-white text-sm sm:text-base">${item.name[currentLang]}</h3>
+                          ${item.badge ? `<span class="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-roven-orange/20 text-roven-orange border border-roven-orange/30">${item.badge[currentLang]}</span>` : ''}
+                        </div>
+                        <p class="text-xs text-gray-400 leading-relaxed">${item.desc[currentLang]}</p>
+                      </div>
+                      <div class="flex flex-col items-end gap-2 shrink-0">
+                        <span class="font-display font-extrabold text-sm sm:text-base text-roven-gold bg-roven-gold/10 border border-roven-gold/25 px-3 py-1 rounded-xl">
+                          ${item.priceNum} RSD
+                        </span>
+                        <button onclick="addToOrder('${item.id}', '${escapeQuotes(item.name.sr)}', '${escapeQuotes(item.name.en)}', ${item.priceNum})" class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-white/10 hover:bg-roven-orange text-gray-200 hover:text-white transition active:scale-95">
+                          ${t.addBtn}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+
+              <!-- Sandwich Add-ons -->
+              <div class="rounded-2xl bg-roven-surface/80 border border-roven-tealLight/30 p-3.5 flex flex-wrap items-center justify-between gap-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-roven-gold">
+                  ${currentLang === 'sr' ? 'Dodaci (Add-ons):' : 'Add-ons:'}
+                </span>
+                <div class="flex flex-wrap items-center gap-2">
+                  ${sw.addons.map(addon => `
+                    <button onclick="addToOrder('${addon.id}', '${escapeQuotes(addon.name.sr)}', '${escapeQuotes(addon.name.en)}', ${addon.priceNum})" class="text-xs bg-roven-dark/80 hover:bg-roven-orange/20 border border-white/10 hover:border-roven-orange/40 px-3 py-1.5 rounded-xl text-gray-200 font-medium transition active:scale-95">
+                      ${addon.name[currentLang]} <strong class="text-roven-gold ml-1">+${addon.priceNum} RSD</strong>
+                    </button>
+                  `).join('')}
+                </div>
+              </div>
+            </section>
+          `;
+        }
+      }
+
+      // 2. CALI LOADED BOWLS
+      if (activeCategory === 'all' || activeCategory === 'bowls') {
+        const bw = MENU_DATA.bowls;
+        const bowlTextSr = `${bw.title.sr} ${bw.subtitle.sr} ${bw.steps.map(s => s.title.sr + ' ' + s.options.sr.join(' ')).join(' ')}`;
+        const bowlTextEn = `${bw.title.en} ${bw.subtitle.en} ${bw.steps.map(s => s.title.en + ' ' + s.options.en.join(' ')).join(' ')}`;
+
+        if (matchesFilters(bowlTextSr, bowlTextEn, [])) {
+          totalVisibleSections++;
+          html += `
+            <section class="space-y-3">
+              <div class="border-l-4 border-roven-gold pl-3">
+                <h2 class="font-display font-extrabold text-lg sm:text-xl text-white tracking-tight">${bw.title[currentLang]}</h2>
+                <p class="text-xs text-gray-400 mt-0.5">${bw.subtitle[currentLang]}</p>
+              </div>
+
+              <!-- Sizes & Prices -->
+              <div class="grid grid-cols-2 gap-2.5">
+                ${bw.sizes.map(sz => `
+                  <div class="rounded-2xl ${sz.accent ? 'bg-roven-teal/35 border-roven-tealLight/50' : 'bg-roven-card border-white/10'} border p-3.5 flex items-center justify-between gap-2">
+                    <div>
+                      <span class="block text-xs font-semibold text-gray-300">${sz.label[currentLang]}</span>
+                      <span class="font-display font-extrabold text-base text-roven-gold">${sz.accent ? '+' : ''}${sz.priceNum} RSD</span>
+                    </div>
+                    <button onclick="addToOrder('${sz.id}', '${escapeQuotes(sz.name.sr)}', '${escapeQuotes(sz.name.en)}', ${sz.priceNum})" class="text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-roven-orange text-gray-200 hover:text-white transition active:scale-95 shrink-0">
+                      ${t.addBtn}
+                    </button>
+                  </div>
+                `).join('')}
+              </div>
+
+              <!-- 3-Step Bowl Builder -->
+              <div class="rounded-2xl bg-roven-card border border-white/10 p-4 space-y-4">
+                ${bw.steps.map(st => `
+                  <div class="flex items-start gap-3">
+                    <div class="px-2 py-1 rounded-lg bg-roven-teal text-roven-gold font-display font-extrabold text-[11px] shrink-0 border border-roven-gold/30">
+                      ${st.step}
+                    </div>
+                    <div class="space-y-1.5 flex-1">
+                      <h4 class="font-bold text-sm text-white">${st.title[currentLang]}</h4>
+                      <div class="flex flex-wrap gap-1.5">
+                        ${st.options[currentLang].map(opt => `
+                          <span class="text-xs bg-roven-surface text-gray-200 px-2.5 py-1 rounded-lg border border-white/5">
+                            ${opt}
+                          </span>
+                        `).join('')}
+                      </div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </section>
+          `;
+        }
+      }
+
+      // 3. CALI GLAZED PLATE — 790 RSD
+      if (activeCategory === 'all' || activeCategory === 'plate') {
+        const pl = MENU_DATA.plate;
+        const plateTextSr = `${pl.title.sr} ${pl.subtitle.sr} ${pl.steps.map(s => s.desc.sr).join(' ')}`;
+        const plateTextEn = `${pl.title.en} ${pl.subtitle.en} ${pl.steps.map(s => s.desc.en).join(' ')}`;
+
+        if (matchesFilters(plateTextSr, plateTextEn, [])) {
+          totalVisibleSections++;
+          html += `
+            <section class="space-y-3">
+              <div class="flex items-center justify-between gap-3 border-l-4 border-roven-orange pl-3">
+                <div>
+                  <h2 class="font-display font-extrabold text-lg sm:text-xl text-white tracking-tight">${pl.title[currentLang]}</h2>
+                  <p class="text-xs text-gray-400 mt-0.5">${pl.subtitle[currentLang]}</p>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  <span class="font-display font-extrabold text-base sm:text-lg text-roven-dark bg-roven-gold px-3 py-1 rounded-xl shadow-lg">
+                    ${pl.priceNum} RSD
+                  </span>
+                  <button onclick="addToOrder('${pl.id}', '${escapeQuotes(pl.title.sr)}', '${escapeQuotes(pl.title.en)}', ${pl.priceNum})" class="text-xs font-bold px-2.5 py-1.5 rounded-xl bg-roven-orange hover:brightness-110 text-white transition active:scale-95">
+                    ${t.addBtn}
+                  </button>
+                </div>
+              </div>
+
+              <div class="rounded-2xl bg-gradient-to-br from-roven-card to-roven-surface border border-white/10 p-4 space-y-3">
+                ${pl.steps.map(st => `
+                  <div class="flex items-start gap-3 pb-3 last:pb-0 border-b last:border-b-0 border-white/5">
+                    <span class="px-2 py-0.5 rounded-md bg-roven-orange/20 text-roven-orange border border-roven-orange/40 font-extrabold text-[11px] shrink-0 mt-0.5">
+                      ${st.step}
+                    </span>
+                    <p class="text-xs sm:text-sm text-gray-200 leading-relaxed">${st.desc[currentLang]}</p>
+                  </div>
+                `).join('')}
+              </div>
+            </section>
+          `;
+        }
+      }
+
+      // 4. SIGNATURE CALI (Medium — 700 RSD each)
+      if (activeCategory === 'all' || activeCategory === 'signature') {
+        const sig = MENU_DATA.signature;
+        const filteredSig = sig.items.filter(item =>
+          matchesFilters(
+            `${sig.title.sr} #${item.num} ${item.format.sr} ${item.protein.sr} ${item.desc.sr}`,
+            `${sig.title.en} #${item.num} ${item.format.en} ${item.protein.en} ${item.desc.en}`,
+            item.tags
+          )
+        );
+
+        if (filteredSig.length > 0) {
+          totalVisibleSections++;
+          html += `
+            <section class="space-y-3">
+              <div class="flex items-center justify-between gap-2 border-l-4 border-roven-gold pl-3">
+                <div>
+                  <h2 class="font-display font-extrabold text-lg sm:text-xl text-white tracking-tight">${sig.title[currentLang]}</h2>
+                  <p class="text-xs text-gray-400 mt-0.5">${sig.subtitle[currentLang]}</p>
+                </div>
+                <span class="shrink-0 text-xs font-extrabold text-roven-gold bg-roven-teal/70 border border-roven-gold/30 px-2.5 py-1 rounded-xl">
+                  ${sig.priceLabel}
+                </span>
+              </div>
+
+              <div class="grid gap-3">
+                ${filteredSig.map(item => {
+                  const isVegan = item.tags.includes('vegan');
+                  const isVegetarian = item.tags.includes('vegetarian');
+                  const isSpicy = item.tags.includes('spicy');
+                  const isSandwich = item.format.en === 'Sandwich';
+                  const itemLabelSr = `Signature Cali #${item.num} (${item.format.sr})`;
+                  const itemLabelEn = `Signature Cali #${item.num} (${item.format.en})`;
+
+                  return `
+                    <div class="rounded-2xl bg-roven-card border border-white/10 hover:border-roven-gold/35 p-4 transition shadow-md">
+                      <div class="flex items-start justify-between gap-3 mb-2">
+                        <div class="flex items-center gap-2 flex-wrap">
+                          <span class="w-6 h-6 rounded-lg bg-roven-gold text-roven-dark font-display font-extrabold text-xs flex items-center justify-center">
+                            ${item.num}
+                          </span>
+                          <span class="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${isSandwich ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-roven-teal/80 text-teal-200 border border-teal-400/30'}">
+                            ${item.format[currentLang]}
+                          </span>
+                          <span class="text-xs font-bold text-gray-300">${item.protein[currentLang]}</span>
+                          ${isVegan ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">🌱 Vegan</span>` : ''}
+                          ${isVegetarian ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-lime-500/20 text-lime-300 border border-lime-500/30">🧀 Vegetarian</span>` : ''}
+                          ${isSpicy ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-roven-orange/20 text-orange-300 border border-roven-orange/30">🔥 ${t.spicy}</span>` : ''}
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                          <span class="font-display font-extrabold text-sm text-roven-gold">
+                            ${item.priceNum} RSD
+                          </span>
+                          <button onclick="addToOrder('${item.id}', '${escapeQuotes(itemLabelSr)}', '${escapeQuotes(itemLabelEn)}', ${item.priceNum})" class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-white/10 hover:bg-roven-orange text-gray-200 hover:text-white transition active:scale-95">
+                            ${t.addBtn}
+                          </button>
+                        </div>
+                      </div>
+                      <p class="text-xs text-gray-300 leading-relaxed pl-8">${item.desc[currentLang]}</p>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </section>
+          `;
+        }
+      }
+
+      // 5. CALI GLAZED FLAVORS (14 Signature Sauces)
+      if (activeCategory === 'all' || activeCategory === 'flavors') {
+        const fl = MENU_DATA.flavors;
+        const filteredSauces = fl.list.filter(sauce => {
+          const tags = sauce.spicy ? ['spicy'] : [];
+          return matchesFilters(`${fl.title.sr} ${sauce.name}`, `${fl.title.en} ${sauce.name}`, tags);
+        });
+
+        if (filteredSauces.length > 0) {
+          totalVisibleSections++;
+          html += `
+            <section class="space-y-3">
+              <div class="border-l-4 border-roven-orange pl-3">
+                <div class="flex items-center justify-between gap-2">
+                  <h2 class="font-display font-extrabold text-lg sm:text-xl text-white tracking-tight">${fl.title[currentLang]}</h2>
+                  <span class="text-[11px] text-orange-300 font-semibold flex items-center gap-1">
+                    🔥 = ${currentLang === 'sr' ? 'Ljuto' : 'Spicy'}
+                  </span>
+                </div>
+                <p class="text-xs text-gray-400 mt-0.5">${fl.subtitle[currentLang]}</p>
+              </div>
+
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                ${filteredSauces.map(sauce => `
+                  <div class="rounded-xl bg-roven-card border ${sauce.spicy ? 'border-roven-orange/35' : 'border-white/10'} px-3 py-2.5 flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2 min-w-0">
+                      <span class="w-3.5 h-3.5 rounded-full border border-white/30 shrink-0 shadow-inner" style="background-color: ${sauce.color}"></span>
+                      <span class="text-xs font-semibold text-gray-100 truncate">${sauce.name}</span>
+                    </div>
+                    ${sauce.spicy ? `<span title="Spicy" class="text-sm shrink-0">🔥</span>` : ''}
+                  </div>
+                `).join('')}
+              </div>
+            </section>
+          `;
+        }
+      }
+
+      // 6. DODATNO / EXTRAS
+      if (activeCategory === 'all' || activeCategory === 'extras') {
+        const ex = MENU_DATA.extras;
+        const filteredExtras = ex.items.filter(item =>
+          matchesFilters(
+            `${ex.title.sr} ${item.name.sr} ${item.desc.sr}`,
+            `${ex.title.en} ${item.name.en} ${item.desc.en}`,
+            []
+          )
+        );
+
+        if (filteredExtras.length > 0) {
+          totalVisibleSections++;
+          html += `
+            <section class="space-y-3">
+              <div class="border-l-4 border-roven-tealLight pl-3">
+                <h2 class="font-display font-extrabold text-lg sm:text-xl text-white tracking-tight">${ex.title[currentLang]}</h2>
+                <p class="text-xs text-gray-400 mt-0.5">${ex.subtitle[currentLang]}</p>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                ${filteredExtras.map(item => `
+                  <div class="rounded-2xl bg-roven-card border border-white/10 p-4 flex items-center justify-between gap-3">
+                    <div>
+                      <h3 class="font-bold text-sm text-white">${item.name[currentLang]}</h3>
+                      <p class="text-xs text-gray-400 mt-0.5">${item.desc[currentLang]}</p>
+                    </div>
+                    <div class="flex flex-col items-end gap-1.5 shrink-0">
+                      <span class="font-display font-extrabold text-sm text-roven-gold bg-roven-gold/10 border border-roven-gold/25 px-3 py-1 rounded-xl">
+                        ${item.priceNum} RSD
+                      </span>
+                      <button onclick="addToOrder('${item.id}', '${escapeQuotes(item.name.sr)}', '${escapeQuotes(item.name.en)}', ${item.priceNum})" class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-white/10 hover:bg-roven-orange text-gray-200 hover:text-white transition active:scale-95">
+                        ${t.addBtn}
+                      </button>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </section>
+          `;
+        }
+      }
+
+      container.innerHTML = html;
+
+      if (totalVisibleSections === 0) {
+        emptyState.classList.remove('hidden');
+      } else {
+        emptyState.classList.add('hidden');
+      }
+    }
+
+    function escapeQuotes(str) {
+      return str.replace(/'/g, "\\'");
+    }
+
+    // =========================================================================
+    // INTERACTIVE CUSTOMER ORDER LIST (Show to Cashier/Server)
+    // =========================================================================
+    function addToOrder(id, nameSr, nameEn, priceNum) {
+      const existing = tableOrder.find(item => item.id === id);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        tableOrder.push({ id, nameSr, nameEn, priceNum, qty: 1 });
+      }
+      updateOrderUI();
+      showToast(`${MENU_DATA.ui[currentLang].addedToast}: ${currentLang === 'sr' ? nameSr : nameEn}`);
+    }
+
+    function changeOrderQty(id, delta) {
+      const idx = tableOrder.findIndex(item => item.id === id);
+      if (idx === -1) return;
+      tableOrder[idx].qty += delta;
+      if (tableOrder[idx].qty <= 0) {
+        tableOrder.splice(idx, 1);
+      }
+      updateOrderUI();
+    }
+
+    function clearOrder() {
+      tableOrder = [];
+      updateOrderUI();
+      closeOrderModal();
+    }
+
+    function updateOrderUI() {
+      const bar = document.getElementById('floating-order-bar');
+      const countBadge = document.getElementById('order-count-badge');
+      const totalBadge = document.getElementById('order-total-badge');
+      const listContainer = document.getElementById('order-items-list');
+      const modalTotalVal = document.getElementById('order-modal-total-val');
+
+      const totalQty = tableOrder.reduce((sum, item) => sum + item.qty, 0);
+      const totalRsd = tableOrder.reduce((sum, item) => sum + item.priceNum * item.qty, 0);
+
+      if (totalQty > 0) {
+        bar.classList.remove('hidden');
+      } else {
+        bar.classList.add('hidden');
+      }
+
+      countBadge.textContent = totalQty;
+      totalBadge.textContent = `${totalRsd} RSD`;
+      modalTotalVal.textContent = `${totalRsd} RSD`;
+
+      listContainer.innerHTML = tableOrder.map(item => `
+        <div class="flex items-center justify-between gap-3 bg-roven-surface/80 border border-white/10 rounded-2xl p-3">
+          <div class="min-w-0">
+            <p class="text-xs font-bold text-white truncate">${currentLang === 'sr' ? item.nameSr : item.nameEn}</p>
+            <p class="text-[11px] text-roven-gold font-semibold">${item.priceNum} RSD × ${item.qty} = ${item.priceNum * item.qty} RSD</p>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <button onclick="changeOrderQty('${item.id}', -1)" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold text-sm flex items-center justify-center">−</button>
+            <span class="text-xs font-extrabold w-4 text-center">${item.qty}</span>
+            <button onclick="changeOrderQty('${item.id}', 1)" class="w-7 h-7 rounded-lg bg-roven-orange text-white font-bold text-sm flex items-center justify-center">+</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openOrderModal() {
+      const modal = document.getElementById('order-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeOrderModal() {
+      const modal = document.getElementById('order-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // =========================================================================
+    // ABOUT MODAL
+    // =========================================================================
+    function openAboutModal() {
+      const modal = document.getElementById('about-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeAboutModal() {
+      const modal = document.getElementById('about-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 2200);
+    }
+
+    // Close modals on backdrop click
+    ['about-modal', 'order-modal'].forEach(id => {
+      document.getElementById(id).addEventListener('click', (e) => {
+        if (e.target.id === id) {
+          document.getElementById(id).classList.add('hidden');
+          document.getElementById(id).classList.remove('flex');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
